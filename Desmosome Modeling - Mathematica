@@ -1,0 +1,111 @@
+(*MICROSCOPE COORDINATE SYSTEM x-y-z*)
+(*x-y is the object plane*)
+\
+(*z is parallel to the optical axis*)
+
+(*DESMOSOME COORDINATE SYSTEM D-E-F*)
+(*for any given individual \
+desmosome*)
+(*D is perpendicular to the plasma membrane*)
+(*D is in \
+the x-y plane*)
+(*F is chosen to coincide with the optical axis such \
+that F = z*)
+(*E-F is the plane of the plasma membrane and \
+perpendicular to the desmosome axis of symmetry*)
+
+(*The transition dipole of a fluorophore fixed within the desmosome \
+is mu*)
+(*The orientation of mu within the desmosome is described by \
+two angles:*)
+(*Alpha is the angle between mu and D*)
+(*Beta is the \
+angle between F and the projection of mu onto the E-F plane*)
+
+(*\[Gamma] = Pi/4;*)
+(*\[Alpha] = Pi/6;*)
+(*\[Beta] = Pi/3;*)
+(*x = \
+{Cos[\[Gamma]],-Sin[\[Gamma]], 0}; (*In DEF System*)
+y = \
+{Sin[\[Gamma]],Cos[\[Gamma]],0}; (*In DEF System*)
+z = {0,0,1}; (*In \
+DEF System*)*)
+(*\[Mu]def = \
+{Cos[\[Alpha]],Sin[\[Alpha]]*Sin[\[Beta]], \
+Sin[\[Alpha]]*Cos[\[Beta]]}; (*In DEF System*)*)
+\[Mu]1[\[Alpha]_, \
+\[Beta]_, \[Gamma]_] := 
+  Cos[\[Alpha]]*Cos[\[Gamma]] - 
+   Sin[\[Alpha]]*Sin[\[Beta]]*
+    Sin[\[Gamma]]; (*x-component xyz system*)
+\[Mu]2[\[Alpha]_, \
+\[Beta]_, \[Gamma]_] := 
+  Cos[\[Alpha]]*Sin[\[Gamma]] + 
+   Sin[\[Alpha]]*Sin[\[Beta]]*
+    Cos[\[Gamma]]; (*y-component xyz system*)
+\[Mu]3[\[Alpha]_, \
+\[Beta]_, \[Gamma]_] := 
+  Sin[\[Alpha]]*
+   Cos[\[Beta]]; (*z-component xyz system*)
+(*\[Mu]xyz = \
+{\[Mu]x,\[Mu]y,\[Mu]z}; (*In xyz system*)*)
+
+p[\[Alpha]_, \[Beta]_] := 
+  Sqrt[((Cos[\[Alpha]])^2) + ((Sin[\[Alpha]])^2)*((Sin[\[Beta]])^2)]; \
+(*The light that we will measure*)
+p1 = 
+ Plot3D[p[\[Alpha], \[Beta]], {\[Alpha], 0, 2 Pi}, {\[Beta], 0, 
+   2 Pi}, AxesLabel -> Automatic, Mesh -> All, 
+  PlotLabel -> 
+   "Light Intensity as a Function of \[Alpha] and \[Beta]", 
+  ColorFunction -> ColorData["Rainbow"], 
+  Ticks -> {{0, Pi/4, Pi/2, 3 Pi/4, Pi, 5 Pi/4, 3 Pi/2, 7 Pi/4, 
+     2 Pi}, {0, Pi/4, Pi/2, 3 Pi/4, Pi, 5 Pi/4, 3 Pi/2, 7 Pi/4, 
+     2 Pi}}] (*Plots measured light intensity for different \
+combinations of \[Alpha] and \[Beta]*)
+p3 = 
+ DensityPlot[
+  p[\[Alpha], \[Beta]], {\[Alpha], 0, 2 Pi}, {\[Beta], 0, 2 Pi}, 
+  ColorFunction -> ColorData["Rainbow"], PlotLegends -> Automatic, 
+  PlotLabel -> 
+   "Heat Map Representing Light Intensities for Combinations of \
+\[Alpha] and \[Beta]"] (*Heat Map*)
+p2 = 
+ Manipulate[
+  Plot[p[\[Alpha], \[Beta]], {\[Alpha], 0, 2 Pi}, 
+   PlotRange -> {0, 1}], {\[Beta], 0, 
+   2 Pi}] (*Vary \[Beta] over \[Alpha]*)
+
+t1 = Table[
+   p[\[Alpha], \[Beta]], {\[Alpha], 0, 2*Pi, Pi/36}, {\[Beta], 0, 
+    2*Pi, Pi/
+     36}]; (*Creates a matrix of \[Alpha] and \[Beta] with \[Alpha] \
+across the top and \[Beta] across the side*)
+
+t2 = Prepend[t1, {"\[Alpha] values"}]; (*Label Top*)
+
+TableForm[t2]; (*Make into table format*)
+
+(*Find the percentage of the total possible measurements that are \
+above a certain tolerance level*)
+
+n = Length[t1[[1]]]; (*number of elements in a row/column*)
+sum = 0; 
+m = 100
+tolerance = 0; (*Value above which we can make measurements*)
+
+toleranceData = ConstantArray[0, m];
+For[j = 1, j <= m, j++, 
+ For[i = 1, i <= n, i++, 
+  sum += Length[Select[t1[[i]], # > tolerance &]]; 
+  toleranceData[[j]] = sum/(n^2)]; tolerance += 1/m; 
+ sum = 0] (*Find the number of data points in the matrix that meet \
+the condition of being above a certain tolerance, repeated for \
+different tolerances*)
+toleranceData
+ListPlot[toleranceData, 
+ AxesLabel -> {"Tolerance (cW/m^2)", Probability}, 
+ PlotLabel -> 
+  "Probability of Receiving a Response to Excitation for a Given \
+Tolerance Level"]
